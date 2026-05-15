@@ -1,6 +1,5 @@
-streamlit>=1.32.0
-openpyxl>=3.1.2
-python-docx>=1.1.0
-pandas>=2.2.0
-# playwright se instala solo en ejecución local (no en Streamlit Cloud)
-# Para activar consultas reales CCB: pip install playwright && playwright install chromium
+streamlit
+pandas
+openpyxl
+python-docx
+playwright

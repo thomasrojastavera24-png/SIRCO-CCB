@@ -210,7 +210,8 @@ class CCBClient:
             resultado = client.consultar_nit("811039217", "2")
     """
 
-    def __init__(self, headless: bool = False):
+    def __init__(self, headless: bool = True):
+        # headless=True por defecto — requerido en Streamlit Cloud y entornos sin pantalla
         self.headless = headless
         self._playwright = None
         self._browser: Optional[Browser] = None
@@ -219,11 +220,25 @@ class CCBClient:
     def __enter__(self):
         if not PLAYWRIGHT_OK:
             raise RuntimeError(
-                "Playwright no está disponible en este entorno. "
-                "Usa el Modo Presentación para demostrar la app sin navegador."
+                "No fue posible ejecutar la consulta real en este entorno. "
+                "Use Modo Presentación."
             )
-        self._playwright = sync_playwright().start()
-        self._browser = self._playwright.chromium.launch(headless=self.headless)
+        try:
+            self._playwright = sync_playwright().start()
+            self._browser = self._playwright.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
+            )
+        except Exception as exc:
+            if self._playwright:
+                try:
+                    self._playwright.stop()
+                except Exception:
+                    pass
+            raise RuntimeError(
+                "No fue posible ejecutar la consulta real en este entorno. "
+                "Use Modo Presentación."
+            ) from exc
         self._page = self._browser.new_page()
         self._cargar_pagina()
         return self
