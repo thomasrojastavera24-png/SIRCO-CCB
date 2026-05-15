@@ -324,11 +324,13 @@ elif pagina == "🔍 Consulta Real CCB":
         from core.ccb_client import CCBClient
         with st.spinner(f"Consultando NIT {nit_base}-{dv} en CCB..."):
             try:
-                with CCBClient(headless=False) as client:
+                with CCBClient() as client:
                     resultado = client.consultar_nit(nit_base=nit_base, dv=dv, nombre_esperado=nombre_ref)
             except Exception as e:
-                st.error(f"No fue posible conectar con la CCB. Detalle: {e}")
-                st.info("Usa el **Modo Presentación** para continuar sin conexión a CCB.")
+                st.error("No fue posible conectar con la CCB. Usa el **Modo Presentación** para continuar.")
+                debug_msg = str(e.__cause__) if e.__cause__ else str(e)
+                with st.expander("Ver detalle técnico"):
+                    st.code(debug_msg)
                 st.stop()
 
         st.divider()
@@ -420,7 +422,7 @@ elif pagina == "📋 Consulta Masiva":
                                    key=f"log_{len(log_lines)}")
 
             try:
-                with CCBClient(headless=False) as client:
+                with CCBClient() as client:
                     for idx, soc in enumerate(pendientes, 1):
                         prog_bar.progress(idx / total)
                         prog_text.text(f"Consultando {idx}/{total}: {soc['nombre']}")
